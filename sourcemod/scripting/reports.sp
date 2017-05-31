@@ -35,6 +35,7 @@ public void OnPluginStart() {
   g_Webook_URL = CreateConVar("sm_report_webhook", "", "Webhook to send reports to", FCVAR_PROTECTED,
                false, _, false, _);
 
+  AutoExecConfig(true, "discord_reports");
 }
 
 public Action ReportCmd(int client, int argc) {

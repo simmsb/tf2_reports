@@ -18,4 +18,4 @@ A sourcemod plugin that redirects reports to a discord webhook.
 * Grab steamworks from [here.](https://users.alliedmods.net/~kyles/builds/SteamWorks/)
 * Grab smjansson from binaries dl [here.](https://forums.alliedmods.net/showthread.php?t=184604)
 * Install both, install this plugin.
-* Set the webhook cvar `sm_report_webhook` to your webhook using rcon.
+* Set the webhook url inside cfg/sourcemod/discord_reports.cfg
