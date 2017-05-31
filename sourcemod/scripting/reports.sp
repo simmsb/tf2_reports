@@ -19,7 +19,6 @@ TF2 reports pusher, written by nitros: [https://github.com/nitros12]
 #define MAX_REQUEST_LENGTH 16384
 
 ConVar g_Webook_URL;
-Handle Discord_request;
 
 public Plugin myinfo = {
   name = "TF2Discord reports",
@@ -35,11 +34,6 @@ public void OnPluginStart() {
 
   g_Webook_URL = CreateConVar("sm_report_webhook", "", "Webhook to send reports to", FCVAR_PROTECTED,
                false, _, false, _);
-
-  char url[500];
-  GetConVarString(g_Webook_URL, url, sizeof(url));
-
-  Discord_request = SteamWorks_CreateHTTPRequest(k_EHTTPMethodPOST, url);
 
   AutoExecConfig(true, "discord_reports");
 }
@@ -86,9 +80,10 @@ public Action ReportCmd(int client, int argc) {
 }
 
 void send_report(const char[] message) {
+  static char url[500];
   static char json_dump_data[MAX_REQUEST_LENGTH];
   json_dump_data[0] = '\0';
-
+  GetConVarString(g_Webook_URL, url, sizeof(url));
 
   Handle json = json_object();
   if (json == INVALID_HANDLE) {
@@ -99,8 +94,14 @@ void send_report(const char[] message) {
 
   json_dump(json, json_dump_data, MAX_REQUEST_LENGTH, 0, true);
 
-  SteamWorks_SetHTTPRequestRawPostBody(Discord_request, "application/json; charset=UTF-8", json_dump_data, strlen(json_dump_data));
-  SteamWorks_SendHTTPRequest(Discord_request);
+  Handle request = SteamWorks_CreateHTTPRequest(k_EHTTPMethodPOST, url);
+  if (request == INVALID_HANDLE) {
+    LogToGame("Error: Could not create http request");
+    return;
+  }
+  SteamWorks_SetHTTPRequestRawPostBody(request, "application/json; charset=UTF-8", json_dump_data, strlen(json_dump_data));
+  SteamWorks_SendHTTPRequest(request);
 
   delete json;
+  delete request;
 }
