@@ -35,7 +35,6 @@ public void OnPluginStart() {
   g_Webook_URL = CreateConVar("sm_report_webhook", "", "Webhook to send reports to", FCVAR_PROTECTED,
                false, _, false, _);
 
-  AutoExecConfig(true, "discord_reports");
 }
 
 public Action ReportCmd(int client, int argc) {
@@ -84,6 +83,9 @@ void send_report(const char[] message) {
   char json_dump_data[MAX_REQUEST_LENGTH];
   json_dump_data[0] = '\0';
   GetConVarString(g_Webook_URL, url, sizeof(url));
+  if (url[0] == '\0') {
+    LogToGame("Error: Webhook url not set");
+  }
 
   Handle json = json_object();
   if (json == INVALID_HANDLE) {
