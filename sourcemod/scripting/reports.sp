@@ -11,12 +11,11 @@ TF2 reports pusher, written by nitros: [https://github.com/nitros12]
 #include <smjansson>
 
 #define PLUGIN_VERSION "0.0.1"
-#define MAX_MESSAGE_LEN 256
 
-#define REPORT_MESSAGE "@here %L has reported players: %s with reason %s\n"
-#define REPORT_MESSAGE_LEN 52
+#define REPORT_MESSAGE "@here %L has issued a report with reason %s\n"
 
-#define MAX_REQUEST_LENGTH 16384
+#define MAX_REQUEST_LENGTH 8192
+#define MAX_MESSAGE_LEN 512
 
 ConVar g_Webook_URL;
 
@@ -39,40 +38,16 @@ public void OnPluginStart() {
 }
 
 public Action ReportCmd(int client, int argc) {
-  if (argc < 2) {
-    ReplyToCommand(client, "[SM] Usage: report <#userid|name> <message>");
+  if (argc < 1) {
+    ReplyToCommand(client, "[SM] Usage: report <message>");
     return Plugin_Handled;
   }
 
-  char player[MAX_NAME_LENGTH],
-      message[MAX_MESSAGE_LEN];
-  GetCmdArg(1, player, sizeof(player));
+  char message[MAX_MESSAGE_LEN];
+  char report_message[MAX_REQUEST_LENGTH];
   GetCmdArgString(message, sizeof(message));
 
-  char target_name[MAX_TARGET_LENGTH];
-  int target_list[MAXPLAYERS], target_count;
-  bool single_player;
-
-  target_count = ProcessTargetString(
-    player,
-    client,
-    target_list,
-    MAXPLAYERS,
-    (COMMAND_FILTER_NO_MULTI | COMMAND_FILTER_NO_BOTS),
-    target_name,
-    sizeof(target_name),
-    single_player
-  );
-
-  int id_strings_size = target_count * 256 + 20;
-  char[] id_strings = new char[id_strings_size];
-  for (int i=0; i<target_count; i++) {
-    Format(id_strings, id_strings_size, "%s, %L", id_strings, target_list[i]);
-  } // loop through turning into a string of comma seperated ids.
-
-  int report_message_size = target_count * 256 + MAX_TARGET_LENGTH + REPORT_MESSAGE_LEN + 40;
-  char[] report_message = new char[report_message_size];
-  Format(report_message, report_message_size, REPORT_MESSAGE, client, id_strings, message);
+  Format(report_message, sizeof(report_message), REPORT_MESSAGE, client, message);
   // Create format message
 
   send_report(report_message);
