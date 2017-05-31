@@ -80,8 +80,8 @@ public Action ReportCmd(int client, int argc) {
 }
 
 void send_report(const char[] message) {
-  static char url[500];
-  static char json_dump_data[MAX_REQUEST_LENGTH];
+  char url[500];
+  char json_dump_data[MAX_REQUEST_LENGTH];
   json_dump_data[0] = '\0';
   GetConVarString(g_Webook_URL, url, sizeof(url));
 
