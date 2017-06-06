@@ -5,8 +5,8 @@ A sourcemod plugin that redirects reports to a discord webhook.
 * get pinged with @here whenever someone uses report.
 * easy to use, install deps, set the webhook and it works.
 
-# use
-* use the command `report <player> <message>`
+# command use
+* use the command `report <message>`
 
 ![image](https://cloud.githubusercontent.com/assets/5330444/26610078/47d5400e-459d-11e7-8eba-03ba32b49e4d.png)
 
