@@ -3,17 +3,16 @@
 TF2 reports pusher, written by nitros: [https://github.com/nitros12]
 
 */
-
-#pragma semicolon 1
-
 #include <sourcemod>
 #include <SteamWorks>
 #include <smjansson>
 
-#define PLUGIN_VERSION "0.0.1"
+#pragma semicolon 1
+#pragma newdecls required
+
+#define PLUGIN_VERSION "0.1.1"
 
 #define REPORT_MESSAGE "@here %L has issued a report with reason %s\n"
-
 #define MAX_REQUEST_LENGTH 8192
 #define MAX_MESSAGE_LEN 512
 
@@ -25,11 +24,11 @@ public Plugin myinfo = {
   description = "Pushes tf2 reports to discord",
   version = PLUGIN_VERSION,
   url = "ben@bensimms.moe"
-}
+};
 
 public void OnPluginStart() {
   LoadTranslations("common.phrases");
-  RegConsoleCmd("report", ReportCmd, "Report a player with a message");
+  RegConsoleCmd("report", ReportCmd, "Send a report message.");
 
   g_Webook_URL = CreateConVar("sm_report_webhook", "", "Webhook to send reports to", FCVAR_PROTECTED,
                false, _, false, _);
@@ -60,26 +59,27 @@ void send_report(const char[] message) {
   json_dump_data[0] = '\0';
   GetConVarString(g_Webook_URL, url, sizeof(url));
   if (url[0] == '\0') {
-    LogToGame("Error: Webhook url not set");
+    LogToGame("<Discord Reports> Error: Webhook url not set");
   }
 
   Handle json = json_object();
   if (json == INVALID_HANDLE) {
-    LogToGame("Error could not create JSON object");
+    LogToGame("<Discord Reports> Error could not create JSON object");
     return;
   }
-  json_object_set_new(json, "content", json_string(message));
 
+  json_object_set_new(json, "content", json_string(message));
   json_dump(json, json_dump_data, MAX_REQUEST_LENGTH, 0, true);
+  delete json;
 
   Handle request = SteamWorks_CreateHTTPRequest(k_EHTTPMethodPOST, url);
   if (request == INVALID_HANDLE) {
-    LogToGame("Error: Could not create http request");
+    LogToGame("<Discord Reports> Error: Could not create http request");
     return;
   }
+
   SteamWorks_SetHTTPRequestRawPostBody(request, "application/json; charset=UTF-8", json_dump_data, strlen(json_dump_data));
   SteamWorks_SendHTTPRequest(request);
 
-  delete json;
   delete request;
 }
