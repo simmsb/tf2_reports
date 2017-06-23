@@ -49,11 +49,12 @@ public Action ReportCmd(int client, int argc) {
   Format(report_message, sizeof(report_message), REPORT_MESSAGE, client, message);
   // Create format message
 
-  send_report(report_message);
+  int result = send_report(report_message);
+  if (result) PrintToChat(client, "Thanks for your report, we will get to it soon");
   return Plugin_Handled;
 }
 
-void send_report(const char[] message) {
+int send_report(const char[] message) {
   char url[500];
   char json_dump_data[MAX_REQUEST_LENGTH];
   json_dump_data[0] = '\0';
@@ -65,7 +66,7 @@ void send_report(const char[] message) {
   Handle json = json_object();
   if (json == INVALID_HANDLE) {
     LogToGame("<Discord Reports> Error could not create JSON object");
-    return;
+    return false;
   }
 
   json_object_set_new(json, "content", json_string(message));
@@ -75,11 +76,12 @@ void send_report(const char[] message) {
   Handle request = SteamWorks_CreateHTTPRequest(k_EHTTPMethodPOST, url);
   if (request == INVALID_HANDLE) {
     LogToGame("<Discord Reports> Error: Could not create http request");
-    return;
+    return false;
   }
 
   SteamWorks_SetHTTPRequestRawPostBody(request, "application/json; charset=UTF-8", json_dump_data, strlen(json_dump_data));
   SteamWorks_SendHTTPRequest(request);
 
   delete request;
+  return true;
 }
