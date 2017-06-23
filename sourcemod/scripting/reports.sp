@@ -49,8 +49,7 @@ public Action ReportCmd(int client, int argc) {
   Format(report_message, sizeof(report_message), REPORT_MESSAGE, client, message);
   // Create format message
 
-  int result = send_report(report_message);
-  if (result) PrintToChat(client, "Thanks for your report, we will get to it soon");
+  if (send_report(report_message)) PrintToChat(client, "Thanks for your report, we will get to it soon");
   return Plugin_Handled;
 }
 
