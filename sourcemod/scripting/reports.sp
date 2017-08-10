@@ -107,4 +107,5 @@ int send_webhoook(const char[] url, const char[] json) {
   SteamWorks_SendHTTPRequest(request);
 
   delete request; 
+  return true;
 }
