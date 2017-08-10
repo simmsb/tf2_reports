@@ -10,12 +10,13 @@ TF2 reports pusher, written by nitros: [https://github.com/nitros12]
 #pragma semicolon 1
 #pragma newdecls required
 
-#define PLUGIN_VERSION "0.1.1"
+#define PLUGIN_VERSION "0.2.0"
 
 #define MAX_REQUEST_LENGTH 4096
 #define MAX_MESSAGE_LEN 512
 
-ConVar g_Webook_URL;
+ConVar Webhook_Url;
+ConVar Echo_Chat;
 
 public Plugin myinfo = {
   name = "TF2Discord reports",
@@ -30,25 +31,32 @@ public void OnPluginStart() {
   RegConsoleCmd("report", ReportCmd, "Send a report message.");
   RegAdminCmd("echo_chat_on", EchoChatOn, ADMFLAG_KICK, "Turn on chat echo.");
   RegAdminCmd("echo_chat_off", EchoChatOff, ADMFLAG_KICK, "Turn off chat echo.");
-  g_Webook_URL = CreateConVar("sm_report_webhook", "", "Webhook to send reports to", FCVAR_PROTECTED,
+  Webhook_Url = CreateConVar("sm_report_webhook", "", "Webhook to send reports to", FCVAR_PROTECTED,
                false, _, false, _);
-
+  Echo_Chat = CreateConVar("sm_report_echo", "0", "Enable chat echo", FCVAR_PROTECTED,
+                           true, 0.0, true, 1.0);
   AutoExecConfig(true, "discord_reports");
+  AddCommandListener(EchoChat, "say");
 }
 
 public Action EchoChatOn(int client, int argc) {
-  HookEvent("player_chat", EchoChat, EventHookMode_Pre);
+  SetConVarBool(Echo_Chat, true, false);
+  PrintToChat(client, "Enabled chat echo!");
+  return Plugin_Handled;
 }
 
 public Action EchoChatOff(int client, int argc) {
-  UnhookEvent("player_chat", EchoChat, EventHookMode_Pre);
+  SetConVarBool(Echo_Chat, false);
+  PrintToChat(client, "Disabled chat echo!");
+  return Plugin_Handled;
 }
 
-public Action EchoChat(Event event, const char[] name, bool dontBroadcast) {
-  int client = GetClientOfUserId(GetEventInt(event, "userid"));
+public Action EchoChat(int client, const char[] command, int argc) {
+  if (!GetConVarBool(Echo_Chat)) return Plugin_Continue;
   char message[MAX_MESSAGE_LEN];
   char formatted_message[MAX_MESSAGE_LEN];
-  GetEventString(event, "text", message, sizeof(message));
+
+  GetCmdArgString(message, sizeof(message));
   Format(formatted_message, sizeof(formatted_message), "CHAT: %L: %s\n", client, message);
 
   send_report(formatted_message);
@@ -77,7 +85,7 @@ int send_report(const char[] message) {
   char url[500];
   char json_dump_data[MAX_REQUEST_LENGTH];
   url[0] = '\0';
-  GetConVarString(g_Webook_URL, url, sizeof(url));
+  GetConVarString(Webhook_Url, url, sizeof(url));
   if (url[0] == '\0') {
     LogToGame("<Discord Reports> Error: Webhook url not set");
   }
