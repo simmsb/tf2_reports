@@ -41,13 +41,13 @@ public void OnPluginStart() {
 
 public Action EchoChatOn(int client, int argc) {
   SetConVarBool(Echo_Chat, true, false);
-  PrintToChat(client, "Enabled chat echo!");
+  ReplyToCommand(client, "Enabled chat echo!");
   return Plugin_Handled;
 }
 
 public Action EchoChatOff(int client, int argc) {
   SetConVarBool(Echo_Chat, false);
-  PrintToChat(client, "Disabled chat echo!");
+  ReplyToCommand(client, "Disabled chat echo!");
   return Plugin_Handled;
 }
 
@@ -76,7 +76,7 @@ public Action ReportCmd(int client, int argc) {
   Format(report_message, sizeof(report_message), "@here %L has issued a report with reason %s\n", client, message);
   // Create format message
 
-  if (send_report(report_message)) PrintToChat(client, "Thanks for your report, we will get to it soon");
+  if (send_report(report_message)) ReplyToCommand(client, "Thanks for your report, we will get to it soon");
   return Plugin_Handled;
 }
 
